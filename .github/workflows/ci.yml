@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v7
+      # What the README asks for: MSYS2's MINGW64 environment with GTK 4.
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-pkgconf
+            mingw-w64-x86_64-gtk4
+      # face_test, render_test against tests/golden, app_test (real windows,
+      # which close by themselves) and dist_test, which builds the bundle and
+      # starts it with nothing from MSYS2 on PATH.
+      - run: sh tests/run.sh
